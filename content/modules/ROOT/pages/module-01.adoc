@@ -1,0 +1,171 @@
+= Writing Your First Playbook
+:toc:
+:toc-placement: auto
+
+In this exercise, you'll use Ansible to conduct basic system setup tasks on a Red Hat Enterprise Linux server. You will become familiar with fundamental Ansible modules like `package` and `user`, and learn how to create and run playbooks. Playbooks in Ansible are essentially scripts written in YAML format, used to define the tasks and configurations that Ansible will apply to your servers.
+
+=== Getting Started with VS Code
+
+All command-line exercises in this workshop are performed in the *VS Code* tab. Click the *VS Code* tab on the right to open the editor.
+
+To open a terminal in VS Code:
+
+. Click on the *Terminal* menu at the top
+. Select *New Terminal*
+
+image::exercise-1-1-setup/vscode-new-terminal.png[Opening a new terminal in VS Code,link=self,window=_blank]
+
+You will use this terminal to run all commands in the exercises that follow.
+
+== Inventory Basics
+
+An inventory tells Ansible what hosts to target and how to group them. In this lab, your working directory `~/lab_inventory` contains the inventory used in prior exercises.
+
+Open the inventory to review hosts and groups:
+
+[source,bash,role=copypaste]
+----
+cd ~/lab_inventory
+cat hosts
+----
+
+An example INI-style inventory might look like:
+
+[source,ini]
+----
+[web]
+node01
+node02
+
+[db]
+node03
+----
+
+In a playbook, the `hosts` key selects which inventory hosts/groups to target. Before moving on, verify connectivity with an ad-hoc ping using the provided inventory:
+
+[source,bash,role=copypaste]
+----
+ansible -i hosts all -m ping
+----
+
+You can substitute `all` with a specific group (e.g., `web`) or host (e.g., `node01`). This helps confirm the inventory is correct before running playbooks.
+
+== Playbook Basics
+
+First, create a text file in YAML format for your playbook. Remember:
+
+* Start with three dashes (`---`).
+* Use spaces, not tabs, for indentation.
+
+Key Concepts:
+
+* `hosts`: Specifies the target servers or devices for your playbook to run against.
+* `tasks`: The actions Ansible will perform.
+* `become`: Allows privilege escalation (running tasks with elevated privileges).
+
+[NOTE]
+====
+An Ansible playbook is designed to be idempotent, meaning if you run it multiple times on the same hosts, it ensures the desired state without making redundant changes.
+====
+
+== Creating Your Playbook
+
+Before creating your first playbook, ensure you are in the correct directory by changing to `~/lab_inventory`:
+
+[source,bash,role=copypaste]
+----
+cd ~/lab_inventory
+----
+
+Now create a playbook named `system_setup.yml` to perform basic system setup:
+
+* Update a couple of core packages to the latest version.
+* Create a new user named 'myuser'.
+
+The basic structure looks as follows:
+
+[source,yaml,role=copypaste]
+----
+---
+- name: Basic System Setup
+  hosts: node01
+  become: true
+  tasks:
+    - name: Install required packages
+      ansible.builtin.package:
+        name:
+          - git
+          - vim
+        state: present
+
+    - name: Create a new user
+      ansible.builtin.user:
+        name: myuser
+        state: present
+        create_home: true
+----
+
+* About the `package` module: This modules manages packages on a target without specifying a package manager module
+
+* About the `user` module: This module is used to manage user accounts.
+
+== Running the Playbook
+
+Execute your playbook using the `ansible-playbook` command:
+
+[source,bash,role=copypaste]
+----
+ansible-playbook -i hosts system_setup.yml
+----
+
+Review the output to ensure each task is completed successfully.
+
+image::exercise-1-1-setup/system_setup_output.png[Playbook output,link=self,window=_blank]
+
+== Checking the Playbook
+
+Now, let's create a second playbook for post-configuration checks, named `system_checks.yml`:
+
+[source,yaml,role=copypaste]
+----
+---
+- name: System Configuration Checks
+  hosts: node01
+  become: true
+  tasks:
+    - name: Check user existence
+      ansible.builtin.command:
+        cmd: id myuser
+      register: user_check
+      changed_when: false
+
+    - name: Report user status
+      ansible.builtin.debug:
+        msg: "User 'myuser' exists."
+      when: user_check.rc == 0
+----
+
+[NOTE]
+====
+`changed_when: false` tells Ansible that this command is read-only and should never report a change. Without it, the `command` module always reports `changed` even for commands that don't modify anything, which would break idempotency reporting.
+====
+
+Run the checks playbook:
+
+[source,bash,role=copypaste]
+----
+ansible-playbook -i hosts system_checks.yml
+----
+
+Review the output to ensure the user creation was successful.
+
+image::exercise-1-1-setup/system_checks_output.png[System checks playbook output,link=self,window=_blank]
+
+== Summary
+
+You've successfully completed the first playbook exercises! You now have:
+
+* Reviewed inventory basics and verified host connectivity
+* Learned the key concepts of Ansible playbooks
+* Created and ran a `system_setup.yml` playbook to install packages and create a user
+* Built a `system_checks.yml` playbook to verify the configuration

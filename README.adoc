@@ -1,0 +1,52 @@
+= Ansible for Red Hat Enterprise Linux Workshop
+
+A Showroom-based workshop covering Ansible automation for Red Hat Enterprise Linux, built on Ansible Automation Platform 2.6.
+
+== Overview
+
+This workshop is available in two formats:
+
+* *Full version* (~3 hours) — 15 modules covering command-line Ansible and Ansible Automation Platform
+* *90-minute version* — 7 modules focused on core AAP workflows
+
+== Structure
+
+* `content/` — AsciiDoc workshop modules and navigation files
+** `nav.adoc` — Full workshop navigation
+** `nav-90.adoc` — 90-minute workshop navigation
+* `config/` — Lab instance definitions
+* `setup-automation/` — Lab provisioning playbooks
+* `runtime-automation/` — Runtime automation playbooks
+* `ui-config.yml` — Showroom UI and tab configuration
+
+== Lab Content
+
+=== Full Workshop
+. Writing Your First Playbook
+. Using Variables
+. Conditionals, Handlers and Loops
+. Templates
+. Collections
+. Ansible Navigator & Execution Environments
+. Debugging and Error Handling
+. Introduction to Automation Platform
+. Inventories and Credentials
+. Projects & Job Templates
+. Surveys
+. Role-based Access Control
+. Workflows
+. System Roles
+. Wrap Up
+
+=== 90-Minute Workshop
+. Writing Your First Playbook
+. Using Variables
+. Projects & Job Templates
+. Surveys
+. Role-based Access Control
+. System Roles
+. Wrap Up
+
+== Related Repositories
+
+* link:https://github.com/ansible-tmm/RHEL-workshop-examples[RHEL Workshop Examples] — Playbooks and roles used in the lab exercises
