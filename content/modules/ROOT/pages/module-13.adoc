@@ -1,0 +1,223 @@
+= Workflows
+:toc:
+:toc-placement: auto
+
+In this exercise, you will link multiple job templates into a workflow. Workflows connect templates that may or may not share inventory, playbooks, or permissions, with conditional logic: if one job succeeds, the next runs; if it fails, an alternate job runs instead. Workflows can also include project or inventory updates, enabling different teams to collaborate efficiently.
+
+=== Lab scenario
+
+You have two departments in your organization:
+
+* *Web operations team:* developing playbooks in their Git branch `webops`.
+* *Web developers team:* working in their branch `webdev`.
+
+When a new Node.js server is needed, the following tasks must be performed:
+
+==== Web operations team tasks
+
+* Install `httpd`, `firewalld`, and `node.js`.
+* Configure `SELinux` settings, open the firewall, and start `httpd` and `node.js`.
+
+==== Web developers team tasks
+
+* Deploy the latest version of the web application and restart `node.js`.
+
+The web operations team sets up the server, and the developers deploy the application.
+
+[NOTE]
+====
+For this example, both teams use branches of the same Git repository. In a real scenario, your source control structure may vary.
+====
+
+=== Set up projects
+
+First, set up the Git repositories as projects.
+
+WARNING: If logged in as *wweb*, log out and log in as *admin*.
+
+Within *Automation Execution → Projects*, click *Create project* to set up the web operations team's project:
+
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Name
+|Webops Git Repo
+
+|Organization
+|Default
+
+|Execution Environment
+|Default execution environment
+
+|Source control type
+|Git
+
+|Source control URL
+|`https://github.com/ansible/workshop-examples.git`
+
+|Source control branch/tag/commit
+|`webops`
+
+|Options
+|✓ Clean +
+✓ Delete +
+✓ Update Revision on Launch
+|===
+
+Click *Create project*.
+
+Repeat the process to set up the *Webdev Git Repo*, using the branch `webdev`.
+
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Name
+|Webdev Git Repo
+
+|Organization
+|Default
+
+|Execution Environment
+|Default execution environment
+
+|Source control type
+|Git
+
+|Source control URL
+|`https://github.com/ansible/workshop-examples.git`
+
+|Source control branch/tag/commit
+|`webdev`
+
+|Options
+|✓ Clean +
+✓ Delete +
+✓ Update Revision on Launch
+|===
+
+=== Set up job templates
+
+Within *Automation Execution → Templates*, click the *Create template* dropdown and select *Create job template*. Fill out the form with the following values:
+
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Name
+|Web App Deploy
+
+|Inventory
+|Workshop Inventory
+
+|Project
+|Webops Git Repo
+
+|Playbook
+|`rhel/webops/web_infrastructure.yml`
+
+|Execution Environment
+|Default execution environment
+
+|Credentials
+|Workshop Credentials
+
+|Options
+|✓ Privilege Escalation
+|===
+
+Click *Create job template*, and then repeat the process for the *Node.js Deploy* template, changing the project to *Webdev Git Repo* and the playbook to `rhel/webdev/install_node_app.yml`.
+
+=== Set up the workflow
+
+Within *Automation Execution → Templates*, click the *Create template* dropdown and select *Create workflow job template*. Fill in the details:
+
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Name
+|Deploy Webapp Server
+|===
+
+Click *Create workflow job template* to open the *Workflow Visualizer*.
+
+image::exercise-2-6-workflows/visualizer_add_step.png[add_step,link=self,window=_blank]
+
+. Click *Add step* and fill in the following for the first node:
++
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Node type
+|Job Template
+
+|Job template
+|Web App Deploy
+
+|Convergence
+|Any
+|===
++
+
+image::exercise-2-6-workflows/visualizer_add_step_app_deploy.png[app_deploy,link=self,window=_blank]
+
+Click *Next* then *Finish*.
+
+. On the first node, click the kebab menu (⋮) and select *Add step and link*. Fill in the following for the second node:
+
+image::exercise-2-6-workflows/visualizer_add_step_add_link.png[add_link,link=self,window=_blank]
+
++
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Node type
+|Job Template
+
+|Job template
+|Node.js Deploy
+
+|Convergence
+|Any
+
+|Run type
+|On Success
+|===
++
+Click *Next* then *Finish*.
+
+image::exercise-2-6-workflows/visualizer_add_step_nodejs.png[add_nodejs,link=self,window=_blank]
+
+Click *Save* to finalize the workflow.
+
+image::exercise-2-6-workflows/visualizer_overview.png[overview,link=self,window=_blank]
+
+=== Launch workflow
+
+From the *Deploy Webapp Server* template, select *Launch template*.
+
+image::exercise-2-6-workflows/launch_template.png[launch_template,link=self,window=_blank]
+
+Once the workflow completes, verify the result using *Run Command*:
+
+. Go to *Automation Execution → Infrastructure → Inventories → Workshop Inventory* and open the *Hosts* tab.
+. Select `node01` and `node02`, then click *Run Command*.
+. In the *Details* window, set *Module* to `command` and *Arguments* to `curl http://localhost/nodejs`. Click *Next*.
+. In the *Execution Environment* window, select *Default execution environment*. Click *Next*.
+. In the *Credential* window, select *Workshop Credentials*. Click *Next*.
+. Review your inputs and click *Finish*.
+
+Verify that the output shows `Hello World`.
+
+== Summary
+
+In this exercise you:
+
+* [x] Created two Git-backed projects for separate teams (webops and webdev)
+* [x] Built job templates for web infrastructure deployment and Node.js application deployment
+* [x] Linked the templates into a conditional workflow using the Workflow Visualizer
+* [x] Launched the workflow and verified the deployed application

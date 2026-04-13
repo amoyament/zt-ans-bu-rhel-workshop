@@ -1,0 +1,151 @@
+= Surveys
+:toc:
+:toc-placement: auto
+
+Surveys in Ansible Automation Controller let you collect extra variables for a playbook through a user-friendly Q&A form, with built-in input validation. In this exercise you will create a job template that uses a Jinja2 role to deploy a custom `index.html`, attach a survey to collect the template values, and launch the job.
+
+[TIP]
+====
+The survey feature provides a simple query for data but does not support dynamic data queries, nested menus, or four-eye principles.
+====
+
+=== The Apache-Configuration Role
+
+The playbook and role with the Jinja2 template are located in the GitHub repository link:https://github.com/ansible-tmm/RHEL-workshop-examples[https://github.com/ansible-tmm/RHEL-workshop-examples,window=_blank] in the `apache` directory.
+
+* Have a look at the playbook `apache_role_install.yml`, which references the role.
+* The role is located in the `roles/role_apache` subdirectory.
+* Inside the role, note the two variables in the `templates/index.html.j2` template file marked by `{{…​}}`.
+* The `tasks/main.yml` file deploys the template.
+
+The playbook creates a file (*dest*) on the managed hosts from the template (*src*).
+
+Because the playbook and role are located in the same GitHub repo as the `apache_install.yml` playbook, you don't need to configure a new project for this exercise.
+
+=== Create a Template with a Survey
+
+Now, let's create a new Template that includes a survey.
+
+==== Create Template
+
+. Go to *Automation Execution → Templates*, click the *Create template* dropdown, and choose *Create job template*.
+
+. Fill out the following details:
++
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Name
+|Create index.html
+
+|Job Type
+|Run
+
+|Inventory
+|Workshop Inventory
+
+|Project
+|Workshop Project
+
+|Playbook
+|`apache/apache_role_install.yml`
+
+|Execution Environment
+|Default execution environment
+
+|Credentials
+|Workshop Credential
+
+|Limit
+|web
+
+|Options
+|✓ Privilege Escalation
+|===
+
+. Click *Create job template*.
++
+image::exercise-2-4-surveys/template_details.png[template details,link=self,window=_blank]
+
+WARNING: *Do not run the template yet!*
+
+==== Add the Survey
+
+. In the Template, click the *Survey* tab, then select *Create survey question*.
+
+. Fill out the following for the first survey question:
++
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Question
+|What would you like as the headline of your web page?
+
+|Answer Variable Name
+|first_line
+
+|Answer Type
+|Text
+|===
++
+
+. Click *Create survey question*.
+
+. Click *Create survey question* to create a second survey question:
++
+[cols="1,1"]
+|===
+|Parameter |Value
+
+|Question
+|What would you like as the subheading of your web page?
+
+|Answer Variable Name
+|second_line
+
+|Answer Type
+|Text
+|===
++
+
+. Click *Create survey question*.
+
+. Enable the survey by toggling the *Survey enabled* switch to the on position.
++
+image::exercise-2-4-surveys/survey_enabled.png[Survey enabled,link=self,window=_blank]
+
+=== Launch the Template
+
+Now, launch the *Create index.html* job template by selecting *Launch template* from the template's kebab menu (⋮) on the Templates list page.
+
+Before the job starts, the survey will prompt you for a headline and subheading for your web page. Enter your text and click *Next*. The *Review* page shows the values—if all looks good, click *Finish* to start the job.
+
+image::exercise-2-4-surveys/survey_launch.png[Survey Launch,link=self,window=_blank]
+
+image::exercise-2-4-surveys/survey_review.png[Survey Review,link=self,window=_blank]
+
+=== Verify the Result
+
+Once the job completes, verify the Apache homepage is serving your custom content by running a `curl` command via *Run Command*:
+
+. Go to *Automation Execution → Infrastructure → Inventories → Workshop Inventory* and open the *Hosts* tab.
+. Select `node01` and `node02`, then click *Run Command*.
+. In the *Details* window, set *Module* to `command` and *Arguments* to `curl http://localhost`. Click *Next*.
+. In the *Execution Environment* window, select *Default execution environment*. Click *Next*.
+. In the *Credential* window, select *Workshop Credentials*. Click *Next*.
+. Review your inputs and click *Finish*.
+
+Verify that the output contains the headline and subheading you entered in the survey.
+
+image::exercise-2-4-surveys/curl_output.png[curl output,link=self,window=_blank]
+
+== Summary
+
+In this exercise you:
+
+* [x] Explored the Apache-configuration role and its Jinja2 template
+* [x] Created a job template for deploying a custom index.html
+* [x] Attached a survey to collect user input for template variables
+* [x] Launched the job and verified the deployed web page
