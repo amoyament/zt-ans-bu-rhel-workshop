@@ -8,6 +8,9 @@ on:
       - 'v*'
       - '90min_v*'
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
