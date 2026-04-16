@@ -110,7 +110,7 @@ The basic structure looks as follows:
         create_home: true
 ----
 
-* About the `package` module: This modules manages packages on a target without specifying a package manager module
+* About the `package` module: This module manages packages on a target without specifying a package manager module
 
 * About the `user` module: This module is used to manage user accounts.
 
