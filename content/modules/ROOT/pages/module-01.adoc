@@ -19,7 +19,7 @@ You will use this terminal to run all commands in the exercises that follow.
 
 [TIP]
 ====
-If you have trouble copying and pasting into the VS Code terminal, you can open VS Code in a separate browser tab: link:https://vscode-$\{guid}.$\{domain}/[Open VS Code in external tab,window=_blank]
+If you have trouble copying and pasting into the VS Code terminal, you can open VS Code in a separate browser tab: https://vscode-{guid}.{domain}/[Open VS Code in external tab,window=_blank]
 ====
 
 == Inventory Basics
